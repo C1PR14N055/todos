@@ -8,7 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
-import { SelectChangeEvent } from '@mui/material';
+import { Button, SelectChangeEvent } from '@mui/material';
 
 import { Todo } from './models/todo';
 import './App.css';
@@ -37,6 +37,14 @@ export default function App() {
 
   const handleSortChange = (event: SelectChangeEvent<string>) => {
     setSortOption(event.target.value);
+  };
+
+  const handleStatusUpdate = (id: string) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, status: 'Done' } : todo
+      )
+    );
   };
 
   const sortedTodos = todos.sort((a, b) => {
@@ -90,6 +98,15 @@ export default function App() {
                 <Typography variant="body2" color="textSecondary" component="p">
                   {todo.status}
                 </Typography>
+
+                {todo.status === 'Active' && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleStatusUpdate(todo.id)}
+                  >Mark as Done</Button>
+                )}
+
               </CardContent>
             </Card>
           </Grid>))}
