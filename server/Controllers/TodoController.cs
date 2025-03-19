@@ -19,6 +19,9 @@ public class TodoController : ControllerBase
         };
 
   private readonly ILogger<TodoController> _logger;
+  private static List<Todo> _cachedTodos;
+  private static DateTime _lastCacheTime;
+  private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
   public TodoController(ILogger<TodoController> logger)
   {
@@ -34,15 +37,18 @@ public class TodoController : ControllerBase
   [HttpGet]
   public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5)
   {
-    List<Todo> todos = new List<Todo>();
-    using (StreamReader r = new StreamReader("./data.json"))
+    if (_cachedTodos == null || DateTime.Now - _lastCacheTime > CacheDuration)
     {
-      string json = r.ReadToEnd();
-      todos = JsonConvert.DeserializeObject<List<Todo>>(json);
+      using (StreamReader r = new StreamReader("./data.json"))
+      {
+        string json = r.ReadToEnd();
+        _cachedTodos = JsonConvert.DeserializeObject<List<Todo>>(json);
+        _lastCacheTime = DateTime.Now;
+      }
     }
 
     // Calc total pages
-    int totalPages = (int)Math.Ceiling(todos.Count / (double)pageSize);
+    int totalPages = (int)Math.Ceiling(_cachedTodos.Count / (double)pageSize);
 
     // Calc items to skip based on pageNumber & pageSize
     int skip = (pageNumber - 1) * pageSize;
@@ -50,7 +56,7 @@ public class TodoController : ControllerBase
     // Return paginated response
     return new PaginatedResponse<Todo>
     {
-      Items = todos.Skip(skip).Take(pageSize),
+      Items = _cachedTodos.Skip(skip).Take(pageSize),
       TotalPages = totalPages
     };
   }
