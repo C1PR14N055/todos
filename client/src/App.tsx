@@ -56,6 +56,9 @@ export default function App() {
                   {new Date(todo.creationTime).toLocaleDateString()}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
+                  &gt; {todo.content}
+                </Typography>
+                <Typography variant="body2" color="textSecondary" component="p">
                   {todo.status}
                 </Typography>
               </CardContent>
