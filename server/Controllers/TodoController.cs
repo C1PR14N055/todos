@@ -63,4 +63,36 @@ public class TodoController : ControllerBase
       TotalPages = totalPages
     };
   }
+
+  [HttpPut("{id}")]
+  public IActionResult UpdateStatus(string id, [FromBody] Todo updatedTodo)
+  {
+    // TODO: Implement this method to DRY the code
+    if (_cachedTodos == null || DateTime.Now - _lastCacheTime > CacheDuration)
+    {
+      using (StreamReader r = new StreamReader("./data.json"))
+      {
+        string json = r.ReadToEnd();
+        _cachedTodos = JsonConvert.DeserializeObject<List<Todo>>(json);
+        _lastCacheTime = DateTime.Now;
+      }
+    }
+
+    var todo = _cachedTodos.FirstOrDefault(t => t.Id == id);
+    if (todo == null)
+    {
+      return NotFound();
+    }
+
+    todo.Status = updatedTodo.Status;
+
+    // Save the updated list back to the file
+    using (StreamWriter w = new StreamWriter("./data.json"))
+    {
+      string json = JsonConvert.SerializeObject(_cachedTodos, Formatting.Indented);
+      w.Write(json);
+    }
+
+    return NoContent();
+  }
 }

@@ -57,11 +57,33 @@ export default function App() {
     setFilterType(event.target.value);
   };
 
-  const handleStatusUpdate = (id: string) => {
+  const handleStatusUpdate = async (id: string) => {
     setTodos((prevTodos) =>
       prevTodos.map((todo) =>
         todo.id === id ? { ...todo, status: 'Done' } : todo
       )
+    );
+
+    let currentTodo = todos.find((todo) => todo.id === id);
+    currentTodo!.status = 'Done';
+    // Persist the status change to the server
+    await fetch(`http://localhost:5001/api/todos/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(currentTodo),
+    });
+
+    // Re-sort the list after updating the status
+    setTodos((prevTodos) =>
+      prevTodos.sort((a, b) => {
+        if (sortOption === 'Active') {
+          return a.status === 'Active' ? -1 : 1;
+        } else {
+          return a.status === 'Done' ? -1 : 1;
+        }
+      })
     );
   };
 
