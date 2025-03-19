@@ -46,7 +46,7 @@ export default function App() {
       }}>
       <Grid container spacing={1}>
         {todos && todos.map((todo) => (
-          <Grid item xs={10}>
+          <Grid item xs={10} key={todo.id}>
             <Card >
               <CardContent>
                 <Typography color="textPrimary" gutterBottom>
