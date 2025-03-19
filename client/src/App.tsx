@@ -17,7 +17,7 @@ import './App.css';
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [sortOption, setSortOption] = useState<string>('Active');
-  // const classes = useStyles();
+  const [sortOrder, setSortOrder] = useState<string>('asc');
 
   useEffect(() => {
     (
@@ -39,6 +39,10 @@ export default function App() {
     setSortOption(event.target.value);
   };
 
+  const handleSortOrderChange = () => {
+    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  };
+
   const handleStatusUpdate = (id: string) => {
     setTodos((prevTodos) =>
       prevTodos.map((todo) =>
@@ -48,6 +52,13 @@ export default function App() {
   };
 
   const sortedTodos = todos.sort((a, b) => {
+    if (sortOrder === 'asc') {
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    } else {
+      return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
+    }
+  })
+  .sort((a, b) => {
     if (sortOption === 'Active') {
       return a.status === 'Active' ? -1 : 1;
     } else {
@@ -81,6 +92,10 @@ export default function App() {
         </Select>
       </FormControl>
 
+      <Button variant="contained" onClick={handleSortOrderChange}>
+        Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+      </Button>
+
       <Grid container spacing={1}>
         {sortedTodos && sortedTodos.map((todo) => (
           <Grid item xs={10} key={todo.id}>
@@ -90,7 +105,7 @@ export default function App() {
                   {todo.title}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  {new Date(todo.creationTime).toLocaleDateString()}
+                  Created: {new Date(todo.creationTime).toLocaleDateString()} | Due: {new Date(todo.dueDate).toLocaleDateString()}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                   &gt; {todo.content}
