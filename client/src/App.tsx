@@ -23,7 +23,7 @@ export default function App() {
       }()
     )
 
-  })
+  }, []);
 
   const callApi = async () => {
     const response = await fetch('http://localhost:5001/api/todos');
