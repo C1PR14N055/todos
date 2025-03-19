@@ -35,7 +35,7 @@ public class TodoController : ControllerBase
   }
 
   [HttpGet]
-  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5)
+  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5, string type = null)
   {
     if (_cachedTodos == null || DateTime.Now - _lastCacheTime > CacheDuration)
     {
@@ -47,8 +47,11 @@ public class TodoController : ControllerBase
       }
     }
 
+    // Filter todos by type if provided
+    var filteredTodos = string.IsNullOrEmpty(type) ? _cachedTodos : _cachedTodos.Where(todo => todo.Type == type).ToList();
+
     // Calc total pages
-    int totalPages = (int)Math.Ceiling(_cachedTodos.Count / (double)pageSize);
+    int totalPages = (int)Math.Ceiling(filteredTodos.Count / (double)pageSize);
 
     // Calc items to skip based on pageNumber & pageSize
     int skip = (pageNumber - 1) * pageSize;
@@ -56,7 +59,7 @@ public class TodoController : ControllerBase
     // Return paginated response
     return new PaginatedResponse<Todo>
     {
-      Items = _cachedTodos.Skip(skip).Take(pageSize),
+      Items = filteredTodos.Skip(skip).Take(pageSize),
       TotalPages = totalPages
     };
   }

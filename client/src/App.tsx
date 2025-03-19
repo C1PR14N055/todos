@@ -22,19 +22,20 @@ export default function App() {
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageSize] = useState<number>(5);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [filterType, setFilterType] = useState<string>('');
 
   useEffect(() => {
     (
       async function () {
-        const data = await callApi(pageNumber, pageSize);
+        const data = await callApi(pageNumber, pageSize, filterType);
         setTodos(data.items);
         setTotalPages(data.totalPages);
       }()
     )
-  }, [pageNumber, pageSize]);
+  }, [pageNumber, pageSize, filterType]);
 
-  const callApi = async (pageNumber: number, pageSize: number) => {
-    const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+  const callApi = async (pageNumber: number, pageSize: number, type: string) => {
+    const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}&type=${type}`);
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
@@ -50,6 +51,10 @@ export default function App() {
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPageNumber(value);
+  };
+
+  const handleFilterChange = (event: SelectChangeEvent<string>) => {
+    setFilterType(event.target.value);
   };
 
   const handleStatusUpdate = (id: string) => {
@@ -101,6 +106,21 @@ export default function App() {
         </Select>
       </FormControl>
 
+      <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
+        <InputLabel id="filter-label">Filter by type:</InputLabel>
+        <Select
+          labelId="filter-label"
+          value={filterType}
+          onChange={handleFilterChange}
+          label="Filter by type:"
+        >
+          <MenuItem value="">All</MenuItem>
+          <MenuItem value="Results">Results</MenuItem>
+          <MenuItem value="Wins">Wins</MenuItem>
+          <MenuItem value="Withdraw">Withdraw</MenuItem>
+        </Select>
+      </FormControl>
+
       <Button variant="contained" onClick={handleSortOrderChange}>
         Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
       </Button>
@@ -120,7 +140,7 @@ export default function App() {
                   &gt; {todo.content}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  {todo.status}
+                  {todo.status} - {todo.type}
                 </Typography>
 
                 {todo.status === 'Active' && (
