@@ -25,8 +25,14 @@ public class TodoController : ControllerBase
     _logger = logger;
   }
 
+  public class PaginatedResponse<T>
+  {
+    public IEnumerable<T> Items { get; set; }
+    public int TotalPages { get; set; }
+  }
+
   [HttpGet]
-  public IEnumerable<Todo> Get()
+  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5)
   {
     List<Todo> todos = new List<Todo>();
     using (StreamReader r = new StreamReader("./data.json"))
@@ -34,6 +40,18 @@ public class TodoController : ControllerBase
       string json = r.ReadToEnd();
       todos = JsonConvert.DeserializeObject<List<Todo>>(json);
     }
-    return todos;
+
+    // Calc total pages
+    int totalPages = (int)Math.Ceiling(todos.Count / (double)pageSize);
+
+    // Calc items to skip based on pageNumber & pageSize
+    int skip = (pageNumber - 1) * pageSize;
+
+    // Return paginated response
+    return new PaginatedResponse<Todo>
+    {
+      Items = todos.Skip(skip).Take(pageSize),
+      TotalPages = totalPages
+    };
   }
 }

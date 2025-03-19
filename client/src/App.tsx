@@ -9,6 +9,7 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import { Button, SelectChangeEvent } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
 
 import { Todo } from './models/todo';
 import './App.css';
@@ -18,18 +19,22 @@ export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [sortOption, setSortOption] = useState<string>('Active');
   const [sortOrder, setSortOrder] = useState<string>('asc');
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [pageSize] = useState<number>(5);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     (
       async function () {
-        const data = await callApi();
-        setTodos(data);
+        const data = await callApi(pageNumber, pageSize);
+        setTodos(data.items);
+        setTotalPages(data.totalPages);
       }()
     )
-  }, []);
+  }, [pageNumber, pageSize]);
 
-  const callApi = async () => {
-    const response = await fetch('http://localhost:5001/api/todos');
+  const callApi = async (pageNumber: number, pageSize: number) => {
+    const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}`);
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
@@ -41,6 +46,10 @@ export default function App() {
 
   const handleSortOrderChange = () => {
     setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  };
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPageNumber(value);
   };
 
   const handleStatusUpdate = (id: string) => {
@@ -126,6 +135,14 @@ export default function App() {
             </Card>
           </Grid>))}
       </Grid>
+
+      <Pagination
+        count={totalPages}
+        page={pageNumber}
+        onChange={handlePageChange}
+        color="primary"
+      />
+
     </Box>
   );
 }
