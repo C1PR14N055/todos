@@ -10,6 +10,10 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import { Button, SelectChangeEvent, TextField } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 import { Todo } from './models/todo';
 import './App.css';
@@ -111,79 +115,94 @@ export default function App() {
     <Box
       sx={{
         display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
+        flexDirection: 'column',
         alignItems: 'center',
-        bgcolor: 'background.paper',
-        overflow: 'hidden',
-        borderRadius: '12px',
-        boxShadow: 1,
-        fontWeight: 'bold',
       }}>
 
-      <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
-        <InputLabel id="sort-label">Order by status:</InputLabel>
-        <Select
-          labelId="sort-label"
-          value={sortOption}
-          onChange={handleSortChange}
-          label="Order by status:"
-        >
-          <MenuItem value="Active">Active</MenuItem>
-          <MenuItem value="Done">Done</MenuItem>
-        </Select>
-      </FormControl>
+      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center' }}>
+        <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
+          <InputLabel id="sort-label">Order by status:</InputLabel>
+          <Select
+            labelId="sort-label"
+            value={sortOption}
+            onChange={handleSortChange}
+            label="Order by status:"
+          >
+            <MenuItem value="Active">Active</MenuItem>
+            <MenuItem value="Done">Done</MenuItem>
+          </Select>
+        </FormControl>
 
-      <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
-        <InputLabel id="filter-label">Filter by type:</InputLabel>
-        <Select
-          labelId="filter-label"
-          value={filterType}
-          onChange={handleFilterChange}
-          label="Filter by type:"
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="Results">Results</MenuItem>
-          <MenuItem value="Wins">Wins</MenuItem>
-          <MenuItem value="Withdraw">Withdraw</MenuItem>
-        </Select>
-      </FormControl>
+        <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
+          <InputLabel id="filter-label">Type:</InputLabel>
+          <Select
+            labelId="filter-label"
+            value={filterType}
+            onChange={handleFilterChange}
+            label="Filter by type:"
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Results">Results</MenuItem>
+            <MenuItem value="Wins">Wins</MenuItem>
+            <MenuItem value="Withdraw">Withdraw</MenuItem>
+          </Select>
+        </FormControl>
 
-      <TextField
-        label="Search"
-        variant="outlined"
-        value={searchKeyword}
-        onChange={handleSearchChange}
-        sx={{ m: 2, minWidth: 120 }}
-      />
+        <TextField
+          label="Search"
+          variant="outlined"
+          value={searchKeyword}
+          onChange={handleSearchChange}
+          sx={{ m: 2, minWidth: 120 }}
+        />
 
-      <Button variant="contained" onClick={handleSortOrderChange}>
-        Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
-      </Button>
+        <Button variant="contained" onClick={handleSortOrderChange}>
+          Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+        </Button>
+      </Box>
 
       <Grid container spacing={1}>
         {sortedTodos && sortedTodos.map((todo) => (
-          <Grid item xs={10} key={todo.id}>
-            <Card >
+          <Grid item xs={12} md={3} sx={{ p: 1 }} key={todo.id}>
+            <Card style={{position: 'relative'}}>
+              <div className={`ribbon ribbon-${todo.type.toLowerCase()}`}>{todo.type}</div>
               <CardContent>
                 <Typography color="textPrimary" gutterBottom>
                   {todo.title}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  Created: {new Date(todo.creationTime).toLocaleDateString()} | Due: {new Date(todo.dueDate).toLocaleDateString()}
+                  <CalendarTodayIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                  {new Date(todo.creationTime).toLocaleDateString()}
+                  <ScheduleIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 1, ml: 2 }} />
+                  {new Date(todo.dueDate).toLocaleDateString()}
                 </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
+                <Typography variant="body2" color="textSecondary" component="p" sx={{ mt: 1, mb: 1 }}>
                   &gt; {todo.content}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  {todo.status} - {todo.type}
+                  
                 </Typography>
 
-                {todo.status === 'Active' && (
+                {todo.status === 'Active' ? (
                   <Button
                     variant="contained"
                     color="primary"
+                    sx={{ mt: 1 }}
                     onClick={() => handleStatusUpdate(todo.id)}
-                  >Mark as Done</Button>
+                  >
+                    Complete
+                    <RadioButtonUncheckedIcon fontSize="small" sx={{ml: 1}} />
+                    </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 1 }}
+                    disabled
+                  >
+                    Completed
+                    <CheckCircleIcon fontSize="small" sx={{ml: 1}} />
+                  </Button>
                 )}
 
               </CardContent>
@@ -192,6 +211,7 @@ export default function App() {
       </Grid>
 
       <Pagination
+        sx={{ mt: 2, mb: 2 }}
         count={totalPages}
         page={pageNumber}
         onChange={handlePageChange}
