@@ -35,7 +35,7 @@ public class TodoController : ControllerBase
   }
 
   [HttpGet]
-  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5, string type = null)
+  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5, string type = null, string fastSearch = null)
   {
     if (_cachedTodos == null || DateTime.Now - _lastCacheTime > CacheDuration)
     {
@@ -49,6 +49,13 @@ public class TodoController : ControllerBase
 
     // Filter todos by type if provided
     var filteredTodos = string.IsNullOrEmpty(type) ? _cachedTodos : _cachedTodos.Where(todo => todo.Type == type).ToList();
+
+    // Filter todos by fastSearch if provided
+    if (!string.IsNullOrEmpty(fastSearch))
+    {
+      filteredTodos = filteredTodos.Where(todo => todo.Title.Contains(fastSearch, StringComparison.OrdinalIgnoreCase)
+      || todo.Content.Contains(fastSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 
     // Calc total pages
     int totalPages = (int)Math.Ceiling(filteredTodos.Count / (double)pageSize);

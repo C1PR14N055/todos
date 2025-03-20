@@ -8,7 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
-import { Button, SelectChangeEvent } from '@mui/material';
+import { Button, SelectChangeEvent, TextField } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
 
 import { Todo } from './models/todo';
@@ -23,19 +23,20 @@ export default function App() {
   const [pageSize] = useState<number>(5);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [filterType, setFilterType] = useState<string>('');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
 
   useEffect(() => {
     (
       async function () {
-        const data = await callApi(pageNumber, pageSize, filterType);
+        const data = await callApi(pageNumber, pageSize, filterType, searchKeyword);
         setTodos(data.items);
         setTotalPages(data.totalPages);
       }()
     )
-  }, [pageNumber, pageSize, filterType]);
+  }, [pageNumber, pageSize, filterType, searchKeyword]);
 
-  const callApi = async (pageNumber: number, pageSize: number, type: string) => {
-    const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}&type=${type}`);
+  const callApi = async (pageNumber: number, pageSize: number, type: string, fastSearch: string) => {
+    const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}&type=${type}&fastSearch=${fastSearch}`);
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
@@ -55,6 +56,10 @@ export default function App() {
 
   const handleFilterChange = (event: SelectChangeEvent<string>) => {
     setFilterType(event.target.value);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(event.target.value);
   };
 
   const handleStatusUpdate = async (id: string) => {
@@ -142,6 +147,14 @@ export default function App() {
           <MenuItem value="Withdraw">Withdraw</MenuItem>
         </Select>
       </FormControl>
+
+      <TextField
+        label="Search"
+        variant="outlined"
+        value={searchKeyword}
+        onChange={handleSearchChange}
+        sx={{ m: 2, minWidth: 120 }}
+      />
 
       <Button variant="contained" onClick={handleSortOrderChange}>
         Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
