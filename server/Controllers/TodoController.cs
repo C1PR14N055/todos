@@ -1,32 +1,15 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 
 [ApiController]
 [EnableCors("AnyPolicy")]
 [Route("api/todos")]
 public class TodoController : ControllerBase
 {
-  private static readonly string[] Summaries = new[]
-  {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-  private readonly ILogger<TodoController> _logger;
   private static List<Todo> _cachedTodos;
   private static DateTime _lastCacheTime;
   private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
-
-  public TodoController(ILogger<TodoController> logger)
-  {
-    _logger = logger;
-  }
 
   public class PaginatedResponse<T>
   {

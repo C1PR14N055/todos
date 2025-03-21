@@ -1,0 +1,24 @@
+.ribbon {
+    position: absolute;
+    color: white;
+    width: 100px;
+    height: 10px;
+    z-index: 3;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 10px;
+    padding: 5px;
+    transform: rotate(45deg);
+    top: 15px;
+    right: -30px;
+    box-shadow: 1px 1px #33333333;
+}
+.ribbon.ribbon-results {
+  background: lightcoral;
+}
+.ribbon.ribbon-wins {
+  background: lightseagreen;
+}
+.ribbon.ribbon-withdraw {
+  background: lightskyblue;
+}

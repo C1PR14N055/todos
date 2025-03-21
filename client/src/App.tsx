@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/system';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -10,11 +7,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import { Button, SelectChangeEvent, TextField } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-
+import TodoCard from './TodoCard';
 import { Todo } from './models/todo';
 import './App.css';
 
@@ -164,49 +157,7 @@ export default function App() {
       <Grid container spacing={1}>
         {sortedTodos && sortedTodos.map((todo) => (
           <Grid item xs={12} md={3} sx={{ p: 1 }} key={todo.id}>
-            <Card style={{position: 'relative'}}>
-              <div className={`ribbon ribbon-${todo.type.toLowerCase()}`}>{todo.type}</div>
-              <CardContent>
-                <Typography color="textPrimary" gutterBottom>
-                  {todo.title}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  <CalendarTodayIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                  {new Date(todo.creationTime).toLocaleDateString()}
-                  <ScheduleIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 1, ml: 2 }} />
-                  {new Date(todo.dueDate).toLocaleDateString()}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" component="p" sx={{ mt: 1, mb: 1 }}>
-                  &gt; {todo.content}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  
-                </Typography>
-
-                {todo.status === 'Active' ? (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    sx={{ mt: 1 }}
-                    onClick={() => handleStatusUpdate(todo.id)}
-                  >
-                    Complete
-                    <RadioButtonUncheckedIcon fontSize="small" sx={{ml: 1}} />
-                    </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    sx={{ mt: 1 }}
-                    disabled
-                  >
-                    Completed
-                    <CheckCircleIcon fontSize="small" sx={{ml: 1}} />
-                  </Button>
-                )}
-
-              </CardContent>
-            </Card>
+            <TodoCard todo={todo} handleStatusUpdate={handleStatusUpdate} />
           </Grid>))}
       </Grid>
 
