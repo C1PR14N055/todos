@@ -9,6 +9,7 @@ import { Button, SelectChangeEvent, TextField } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
 import TodoCard from './TodoCard';
 import { Todo } from './models/todo';
+import CircularProgress from '@mui/material/CircularProgress';
 import './App.css';
 
 
@@ -21,13 +22,16 @@ export default function App() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [filterType, setFilterType] = useState<string>('');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     (
       async function () {
+        setIsLoading(true);
         const data = await callApi(pageNumber, pageSize, filterType, searchKeyword);
         setTodos(data.items);
         setTotalPages(data.totalPages);
+        setIsLoading(false);
       }()
     )
   }, [pageNumber, pageSize, filterType, searchKeyword]);
@@ -110,67 +114,71 @@ export default function App() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-      }}>
-
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center' }}>
-        <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
-          <InputLabel id="sort-label">Order by status:</InputLabel>
-          <Select
-            labelId="sort-label"
-            value={sortOption}
-            onChange={handleSortChange}
-            label="Order by status:"
-          >
-            <MenuItem value="Active">Active</MenuItem>
-            <MenuItem value="Done">Done</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
-          <InputLabel id="filter-label">Type:</InputLabel>
-          <Select
-            labelId="filter-label"
-            value={filterType}
-            onChange={handleFilterChange}
-            label="Filter by type:"
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Results">Results</MenuItem>
-            <MenuItem value="Wins">Wins</MenuItem>
-            <MenuItem value="Withdraw">Withdraw</MenuItem>
-          </Select>
-        </FormControl>
-
-        <TextField
-          label="Search"
-          variant="outlined"
-          value={searchKeyword}
-          onChange={handleSearchChange}
-          sx={{ m: 2, minWidth: 120 }}
-        />
-
-        <Button variant="contained" onClick={handleSortOrderChange}>
-          Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
-        </Button>
-      </Box>
-
-      <Grid container spacing={1}>
-        {sortedTodos && sortedTodos.map((todo) => (
-          <Grid item xs={12} md={3} sx={{ p: 1 }} key={todo.id}>
-            <TodoCard todo={todo} handleStatusUpdate={handleStatusUpdate} />
-          </Grid>))}
-      </Grid>
-
-      <Pagination
-        sx={{ mt: 2, mb: 2 }}
-        count={totalPages}
-        page={pageNumber}
-        onChange={handlePageChange}
-        color="primary"
-      />
-
+      }}
+    >
+      {isLoading ? (
+        <CircularProgress sx={{ mt: 5 }} />
+      ) : (
+        <>
+          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center' }}>
+            <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
+              <InputLabel id="sort-label">Order by status:</InputLabel>
+              <Select
+                labelId="sort-label"
+                value={sortOption}
+                onChange={handleSortChange}
+                label="Order by status:"
+              >
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Done">Done</MenuItem>
+              </Select>
+            </FormControl>
+  
+            <FormControl variant="outlined" sx={{ m: 2, minWidth: 120 }}>
+              <InputLabel id="filter-label">Type:</InputLabel>
+              <Select
+                labelId="filter-label"
+                value={filterType}
+                onChange={handleFilterChange}
+                label="Filter by type:"
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="Results">Results</MenuItem>
+                <MenuItem value="Wins">Wins</MenuItem>
+                <MenuItem value="Withdraw">Withdraw</MenuItem>
+              </Select>
+            </FormControl>
+  
+            <TextField
+              label="Search"
+              variant="outlined"
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              sx={{ m: 2, minWidth: 120 }}
+            />
+  
+            <Button variant="contained" onClick={handleSortOrderChange}>
+              Sort by date ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+            </Button>
+          </Box>
+  
+          <Grid container spacing={1}>
+            {sortedTodos && sortedTodos.map((todo) => (
+              <Grid item xs={12} md={3} sx={{ p: 1 }} key={todo.id}>
+                <TodoCard todo={todo} handleStatusUpdate={handleStatusUpdate} />
+              </Grid>
+            ))}
+          </Grid>
+  
+          <Pagination
+            sx={{ mt: 2, mb: 2 }}
+            count={totalPages}
+            page={pageNumber}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </>
+      )}
     </Box>
   );
 }
-
-
