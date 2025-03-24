@@ -17,8 +17,7 @@ public class TodoController : ControllerBase
     public int TotalPages { get; set; }
   }
 
-  [HttpGet]
-  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5, string type = null, string fastSearch = null)
+  private void LoadTodosFromCache()
   {
     if (_cachedTodos == null || DateTime.Now - _lastCacheTime > CacheDuration)
     {
@@ -29,6 +28,21 @@ public class TodoController : ControllerBase
         _lastCacheTime = DateTime.Now;
       }
     }
+  }
+
+  private void SaveTodosToJsonFile(List<Todo> todos)
+  {
+    using (StreamWriter w = new StreamWriter("./data.json"))
+    {
+      string json = JsonConvert.SerializeObject(todos, Formatting.Indented);
+      w.Write(json);
+    }
+  }
+
+  [HttpGet]
+  public PaginatedResponse<Todo> Get(int pageNumber = 1, int pageSize = 5, string type = null, string fastSearch = null)
+  {
+    LoadTodosFromCache();
 
     // Filter todos by type if provided
     var filteredTodos = string.IsNullOrEmpty(type) ? _cachedTodos : _cachedTodos.Where(todo => todo.Type == type).ToList();
@@ -57,32 +71,16 @@ public class TodoController : ControllerBase
   [HttpPut("{id}")]
   public IActionResult UpdateStatus(string id, [FromBody] Todo updatedTodo)
   {
-    // TODO: Implement this method to DRY the code
-    if (_cachedTodos == null || DateTime.Now - _lastCacheTime > CacheDuration)
-    {
-      using (StreamReader r = new StreamReader("./data.json"))
-      {
-        string json = r.ReadToEnd();
-        _cachedTodos = JsonConvert.DeserializeObject<List<Todo>>(json);
-        _lastCacheTime = DateTime.Now;
-      }
-    }
+    LoadTodosFromCache();
 
     var todo = _cachedTodos.FirstOrDefault(t => t.Id == id);
     if (todo == null)
     {
       return NotFound();
     }
-
     todo.Status = updatedTodo.Status;
 
-    // Save the updated list back to the file
-    using (StreamWriter w = new StreamWriter("./data.json"))
-    {
-      string json = JsonConvert.SerializeObject(_cachedTodos, Formatting.Indented);
-      w.Write(json);
-    }
-
+    SaveTodosToJsonFile(_cachedTodos);
     return NoContent();
   }
 }
