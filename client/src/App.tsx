@@ -37,10 +37,15 @@ export default function App() {
   }, [pageNumber, pageSize, filterType, searchKeyword]);
 
   const callApi = async (pageNumber: number, pageSize: number, type: string, fastSearch: string) => {
-    const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}&type=${type}&fastSearch=${fastSearch}`);
-    const body = await response.json();
-    if (response.status !== 200) throw Error(body.message);
-    return body;
+    try {
+      const response = await fetch(`http://localhost:5001/api/todos?pageNumber=${pageNumber}&pageSize=${pageSize}&type=${type}&fastSearch=${fastSearch}`);
+      const body = await response.json();
+      if (response.status !== 200) throw Error(body.message);
+      return body;
+    } catch (error) {
+      alert('Failed to fetch data from the server');
+      throw error;
+    }
   };
 
   const handleSortChange = (event: SelectChangeEvent<string>) => {
@@ -72,25 +77,34 @@ export default function App() {
 
     let currentTodo = todos.find((todo) => todo.id === id);
     currentTodo!.status = 'Done';
-    // Persist the status change to the server
-    await fetch(`http://localhost:5001/api/todos/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(currentTodo),
-    });
 
-    // Re-sort the list after updating the status
-    setTodos((prevTodos) =>
-      prevTodos.sort((a, b) => {
-        if (sortOption === 'Active') {
-          return a.status === 'Active' ? -1 : 1;
-        } else {
-          return a.status === 'Done' ? -1 : 1;
-        }
-      })
-    );
+    try {
+      // Persist the status change to the server
+      const response = await fetch(`http://localhost:5001/api/todos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(currentTodo),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update status on the server');
+      }
+  
+      // Re-sort the list after updating the status
+      setTodos((prevTodos) =>
+        prevTodos.sort((a, b) => {
+          if (sortOption === 'Active') {
+            return a.status === 'Active' ? -1 : 1;
+          } else {
+            return a.status === 'Done' ? -1 : 1;
+          }
+        })
+      );
+    } catch (error) {
+      alert('Failed to update status on the server. Please try again later.');
+    }
   };
 
   const sortedTodos = todos.sort((a, b) => {
